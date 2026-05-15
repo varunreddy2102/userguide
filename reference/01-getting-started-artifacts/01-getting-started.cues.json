@@ -1,0 +1,92 @@
+[
+  {
+    "tStart": 3013,
+    "tEnd": 6089,
+    "text": "Welcome to the 247HRM Helpdesk Agent Handbook.",
+    "ttsText": "Welcome to the Twenty four seven H R M Helpdesk Agent Handbook."
+  },
+  {
+    "tStart": 6343,
+    "tEnd": 9586,
+    "text": "In ninety seconds, we'll log you in and tour the screen.",
+    "ttsText": "In ninety seconds, we'll log you in and tour the screen."
+  },
+  {
+    "tStart": 9838,
+    "tEnd": 13249,
+    "text": "Login is passwordless. Just your work email and a one-time code.",
+    "ttsText": "Login is passwordless. Just your work email and a one-time code."
+  },
+  {
+    "tStart": 16327,
+    "tEnd": 18773,
+    "text": "Click Send OTP.",
+    "ttsText": "Click Send O T P."
+  },
+  {
+    "tStart": 20098,
+    "tEnd": 23351,
+    "text": "Check your email — a six-digit code arrives in seconds.",
+    "ttsText": "Check your email — a six-digit code arrives in seconds."
+  },
+  {
+    "tStart": 25557,
+    "tEnd": 28223,
+    "text": "Click Validate to sign in.",
+    "ttsText": "Click Validate to sign in."
+  },
+  {
+    "tStart": 29838,
+    "tEnd": 32064,
+    "text": "You land on the dashboard.",
+    "ttsText": "You land on the dashboard."
+  },
+  {
+    "tStart": 32327,
+    "tEnd": 35068,
+    "text": "Three regions repeat across every screen.",
+    "ttsText": "Three regions repeat across every screen."
+  },
+  {
+    "tStart": 35329,
+    "tEnd": 38922,
+    "text": "Top — the global bar. Timezone, notifications, your role.",
+    "ttsText": "Top — the global bar. Timezone, notifications, your role."
+  },
+  {
+    "tStart": 39178,
+    "tEnd": 42946,
+    "text": "Left — the sidenav. Each link is a module you have access to.",
+    "ttsText": "Left — the sidenav. Each link is a module you have access to."
+  },
+  {
+    "tStart": 43198,
+    "tEnd": 46188,
+    "text": "And the main area, which changes as you navigate.",
+    "ttsText": "And the main area, which changes as you navigate."
+  },
+  {
+    "tStart": 46439,
+    "tEnd": 49229,
+    "text": "Most days you'll spend in Tickets.",
+    "ttsText": "Most days you'll spend in Tickets."
+  },
+  {
+    "tStart": 49835,
+    "tEnd": 51290,
+    "text": "Let's open it.",
+    "ttsText": "Let's open it."
+  },
+  {
+    "tStart": 52371,
+    "tEnd": 54009,
+    "text": "Your inbox.",
+    "ttsText": "Your inbox."
+  },
+  {
+    "tStart": 54281,
+    "tEnd": 57869,
+    "text": "Six counters at the top show today's pulse.",
+    "ttsText": "Six counters at the top show today's pulse."
+  }
+]

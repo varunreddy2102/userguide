@@ -1,0 +1,26 @@
+[
+  {
+    "tMs": 0,
+    "label": "Intro"
+  },
+  {
+    "tMs": 3013,
+    "label": "Welcome"
+  },
+  {
+    "tMs": 9838,
+    "label": "Login"
+  },
+  {
+    "tMs": 29838,
+    "label": "Tour"
+  },
+  {
+    "tMs": 46439,
+    "label": "Open Tickets"
+  },
+  {
+    "tMs": 58226,
+    "label": "Wrap"
+  }
+]

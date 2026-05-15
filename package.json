@@ -1,0 +1,21 @@
+{
+  "name": "userguide-skill",
+  "version": "0.1.0",
+  "description": "Claude Code skill: build multi-format product handbooks from markdown (HTML, PDF, instructional videos)",
+  "license": "MIT",
+  "author": "Varun Reddy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/varunreddy2102/userguide"
+  },
+  "dependencies": {
+    "marked": "^15.0.0",
+    "@playwright/test": "^1.40.0"
+  },
+  "bin": {
+    "userguide-build-html": "scripts/build-html.js",
+    "userguide-build-pdf": "scripts/build-pdf.js",
+    "userguide-build-video": "scripts/build-video.js",
+    "userguide-scaffold": "scripts/scaffold.js"
+  }
+}
