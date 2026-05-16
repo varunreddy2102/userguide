@@ -425,8 +425,36 @@ class VideoDirector {
         await this.page.waitForTimeout(this._ms(ms));
     }
 
+    /**
+     * Goto a URL and re-inject overlays.
+     *
+     * ⚠️ For hash-routed SPAs (Angular `useHash: true`), the route change
+     * doesn't fire fresh HTTP requests, so `networkidle` can resolve while the
+     * lazy-loaded module is still mounting — you end up acting on the previous
+     * page's DOM. Prefer `gotoAndWait(url, marker)` when navigating to a hash
+     * route on a SPA.
+     */
     async goto(url) {
         await this.page.goto(url, { waitUntil: 'networkidle' });
+        await this.reinstall();
+    }
+
+    /**
+     * Goto a URL and wait for a page-specific text/selector to appear before
+     * returning. Use this for hash-routed SPAs where `networkidle` lies.
+     *
+     * @param {string} url    target URL (use the `/#/` form on hash-routed SPAs)
+     * @param {string} marker Playwright selector that exists ONLY on the target
+     *                        page. Text selectors are usually safest:
+     *                        `'text=Settings'`, `'text=IP Security'`, etc.
+     * @param {number} [timeout=20000]
+     *
+     * Example:
+     *   await v.gotoAndWait(`${UI}/#/settings`, 'text=Settings');
+     */
+    async gotoAndWait(url, marker, timeout = 20000) {
+        await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+        await this.page.waitForSelector(marker, { timeout });
         await this.reinstall();
     }
 
