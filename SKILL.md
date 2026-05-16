@@ -223,6 +223,100 @@ others — only changed cues need `REGENERATE_AUDIO=1` (or delete that one
 | Record next video | Copy `video-01-example.spec.js` → write beats → run Playwright → run build-video.js |
 | Swap voice | `VOICE=<name> node …/build-video.js …` or edit voices.json |
 
+## ⚠️ Anti-foot-gun checklist (READ BEFORE EACH RUN)
+
+These four traps have shipped semantically-wrong artifacts more than once. Each is silent — Playwright reports "test passed" while the produced MP4 or PNG is wrong (login page instead of admin page, narrated screenshots instead of training videos, etc.). The pipeline itself is fine; these are usage gotchas you must guard against in your spec.
+
+### A. Hash-routed SPAs — always use `/#/` in URLs
+
+If `page.goto('/some-route')` is used on a hash-routed SPA (Angular `useHash: true` or `Router.forRoot` with `useHash`), the navigation **silently lands on the SPA's default route**, NOT the requested one. AuthGuard then bounces to `/login` or `/dashboard`.
+
+```js
+// ❌ WRONG — SPA bounces to default authenticated route
+await page.goto(`${UI}/ipsecurity`);
+
+// ✅ CORRECT — hash-route navigation
+await page.goto(`${UI}/#/ipsecurity`);
+```
+
+Heuristic: paste a route into a browser's address bar. If the URL has `#` after Angular's first redirect, you're hash-routed. Use `/#/` in every Playwright `goto`.
+
+### B. `waitUntil: 'networkidle'` doesn't wait for hash-route component mount
+
+Hash navigation changes the URL fragment only — no fresh HTTP request fires for the route change itself. `networkidle` resolves immediately while the lazy-loaded module is still fetching its chunk. You screenshot the previous page.
+
+**Fix:** wait for a page-specific text/element marker AFTER each hash goto:
+
+```js
+// ❌ WRONG — networkidle returns before the new component mounts
+await page.goto(`${UI}/#/settings`, { waitUntil: 'networkidle' });
+await page.screenshot({ path: 'settings.png' });   // might still be dashboard
+
+// ✅ CORRECT — wait for an element only the target page renders
+await page.goto(`${UI}/#/settings`, { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('text=Settings', { timeout: 15_000 });
+await page.screenshot({ path: 'settings.png' });
+
+// ✅ EVEN BETTER — use the VideoDirector.gotoAndWait helper
+await v.gotoAndWait(`${UI}/#/settings`, 'text=Settings');
+```
+
+### C. Login helpers must wait for AUTH-COMPLETE, not `domcontentloaded`
+
+The SPA's signin-oidc → dashboard auth flow runs AFTER `domcontentloaded`. If your login helper returns at that point and the caller fires the next `goto` immediately, the SPA's auth dance gets interrupted → it bounces back to `/login`.
+
+**Mark of "auth fully complete":** a localStorage key that only the post-token API response can populate (e.g. `employeeDetails`, `userProfile`, `currentUser` — depends on your app).
+
+```js
+// ❌ WRONG — returns too early
+await page.reload({ waitUntil: 'domcontentloaded' });
+// caller now does page.goto() → interrupts auth → SPA → /login
+
+// ✅ CORRECT — wait for the SPA to finish its post-token bootstrap
+await page.reload({ waitUntil: 'domcontentloaded' });
+await page.waitForFunction(
+  () => !!localStorage.getItem('employeeDetails'),  // ← your app's marker
+  { timeout: 30_000 },
+);
+await page.waitForTimeout(500);  // one zone-task settle tick
+```
+
+### D. Storyboard sanity-check before recording
+
+If the spec only calls `narrate()` over a static page with no `click()` / `point()` / `highlight()`, the viewer sees nothing happen. The narration says "click X" while the screen shows a still page.
+
+**Rule of thumb:** every chapter ≥ 3s should contain at least one cursor movement (`v.point()` or `v.click()`) or a `v.highlight()`. If a chapter is pure prose, demote it to part of an adjacent action beat.
+
+---
+
+## ✅ Verify-before-claiming-done — MANDATORY for video/screenshot artifacts
+
+Both the video pass and the screenshot pass have shipped semantically-wrong artifacts when this step was skipped. The fix is fast: extract a frame, view it via Claude Code's `Read` tool, confirm the content matches intent BEFORE you commit.
+
+### For videos
+
+```bash
+# Extract a mid-content frame from the final MP4
+LEAD=$(node -e "process.stdout.write(((require('./<NAME>/<NAME>.meta.json').leadInMs||0)/1000).toFixed(3))")
+ffmpeg -y -ss 25 -i <NAME>/<NAME>.mp4 -vframes 1 -vf "scale=1280:-1" /tmp/verify.png
+```
+
+Then in your assistant session: `Read('/tmp/verify.png')` — confirm the page on screen matches what the narration is talking about. If the dashboard shows while the caption says "Open Settings", the hash-routing bug (A or B) bit you.
+
+### For screenshots
+
+`Read` each output PNG directly. If the rendered page is `/login` or the dashboard when the filename says `settings-page`, you have a timing bug (C — auth race — or B — hash route mount). Re-run with the fixes above.
+
+### Verification status to surface in the PR
+
+After verifying, the PR comment should literally say something like:
+
+> Verified by extracting frames from each final MP4 and viewing them directly via the Read tool. Confirmed: video 01 frame at 25s shows Settings page with caption "Click the IP Restrictions tab". (Etc per video.)
+
+If you can't say that, **you haven't verified**. Don't ship.
+
+---
+
 ## Things to be careful about
 
 1. **Don't commit the ElevenLabs API key.** Only via env var, never in files.
